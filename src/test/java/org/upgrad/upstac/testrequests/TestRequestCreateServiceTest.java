@@ -91,20 +91,11 @@ class TestRequestCreateServiceTest {
 
         List<TestRequest> existingTestRequests = getExistingTestRequests();
         Mockito.when(testRequestRepository.findByEmailOrPhoneNumber(createTestRequest.getEmail(),createTestRequest.getPhoneNumber())).thenReturn(existingTestRequests);
-        //testRequestRepository.save
-        //return TestRequest
-
-
-        //Act
-        // Call createTestRequestFrom
-
-
 
         AppException result = assertThrows(AppException.class,()->{
 
             testRequestService.createTestRequestFrom(user,createTestRequest);
         });
-
 
         //Assert
 
