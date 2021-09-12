@@ -22,6 +22,14 @@ public class LabResultService {
     @Autowired
     private LabResultRepository labResultRepository;
 
+    /**
+     * create lab result
+     *
+     * @param tester tester
+     * @param testRequest testRequest
+     * @return {@link LabResult}
+     * @see LabResult
+     */
     private LabResult createLabResult(User tester, TestRequest testRequest) {
         LabResult labResult = new LabResult();
         labResult.setTester(tester);
@@ -29,12 +37,27 @@ public class LabResultService {
         return saveLabResult(labResult);
     }
 
+    /**
+     * save lab result
+     *
+     * @param labResult labResult
+     * @return {@link LabResult}
+     * @see LabResult
+     */
     @Transactional
     LabResult saveLabResult(LabResult labResult) {
         return labResultRepository.save(labResult);
     }
 
 
+    /**
+     * assign for lab test
+     *
+     * @param testRequest testRequest
+     * @param tester tester
+     * @return {@link LabResult}
+     * @see LabResult
+     */
     public LabResult assignForLabTest(TestRequest testRequest, User tester) {
 
         return createLabResult(tester, testRequest);
@@ -43,6 +66,14 @@ public class LabResultService {
     }
 
 
+    /**
+     * update lab test
+     *
+     * @param testRequest testRequest
+     * @param createLabResult createLabResult
+     * @return {@link LabResult}
+     * @see LabResult
+     */
     public LabResult updateLabTest(TestRequest testRequest, CreateLabResult createLabResult) {
 
         LabResult labResult = labResultRepository.findByRequest(testRequest).orElseThrow(() -> new AppException("Invalid Request"));
@@ -56,8 +87,6 @@ public class LabResultService {
         labResult.setUpdatedOn(now());
 
         return saveLabResult(labResult);
-
-
     }
 
 

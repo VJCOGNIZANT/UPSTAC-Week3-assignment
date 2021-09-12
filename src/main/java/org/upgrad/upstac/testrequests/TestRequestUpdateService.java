@@ -46,12 +46,28 @@ public class TestRequestUpdateService {
     }
 
 
+    /**
+     * update status and save
+     *
+     * @param testRequest testRequest
+     * @param status status
+     * @return {@link TestRequest}
+     * @see TestRequest
+     */
     TestRequest updateStatusAndSave(TestRequest testRequest, RequestStatus status) {
         testRequest.setStatus(status);
         return saveTestRequest(testRequest);
     }
 
 
+    /**
+     * assign for lab test
+     *
+     * @param id id
+     * @param tester tester
+     * @return {@link TestRequest}
+     * @see TestRequest
+     */
     public TestRequest assignForLabTest(Long id, User tester) {
         TestRequest testRequest = testRequestRepository.findByRequestIdAndStatus(id, INITIATED).orElseThrow(() -> new AppException("Invalid ID"));
         LabResult labResult = labResultService.assignForLabTest(testRequest, tester);
@@ -60,6 +76,15 @@ public class TestRequestUpdateService {
         return updateStatusAndSave(testRequest, LAB_TEST_IN_PROGRESS);
     }
 
+    /**
+     * update lab test
+     *
+     * @param id id
+     * @param createLabResult createLabResult
+     * @param tester tester
+     * @return {@link TestRequest}
+     * @see TestRequest
+     */
     public TestRequest updateLabTest(Long id, @Valid CreateLabResult createLabResult, User tester) {
         TestRequest testRequest = testRequestRepository.findByRequestIdAndStatus(id, LAB_TEST_IN_PROGRESS).orElseThrow(() -> new AppException("Invalid ID or State"));
 
@@ -68,6 +93,14 @@ public class TestRequestUpdateService {
         return updateStatusAndSave(testRequest, LAB_TEST_COMPLETED);
     }
 
+    /**
+     * assign for consultation
+     *
+     * @param id id
+     * @param doctor doctor
+     * @return {@link TestRequest}
+     * @see TestRequest
+     */
     public TestRequest assignForConsultation(Long id, User doctor) {
         TestRequest testRequest = testRequestRepository.findByRequestIdAndStatus(id, LAB_TEST_COMPLETED).orElseThrow(() -> new AppException("Invalid ID or State"));
         Consultation consultation = consultationService.assignForConsultation(testRequest, doctor);
@@ -77,6 +110,15 @@ public class TestRequestUpdateService {
     }
 
 
+    /**
+     * update consultation
+     *
+     * @param id id
+     * @param createConsultationRequest createConsultationRequest
+     * @param doctor doctor
+     * @return {@link TestRequest}
+     * @see TestRequest
+     */
     public TestRequest updateConsultation(Long id, @Valid CreateConsultationRequest createConsultationRequest, User doctor) {
 
         TestRequest testRequest = testRequestRepository.findByRequestIdAndStatus(id, DIAGNOSIS_IN_PROCESS).orElseThrow(() -> new AppException("Invalid ID or State"));

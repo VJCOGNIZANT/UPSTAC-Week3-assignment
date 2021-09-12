@@ -19,10 +19,15 @@ public class UserLoggedInService {
         this.userService = userService;
     }
 
+    /**
+     * get logged in user
+     *
+     * @return {@link User}
+     * @see User
+     */
     public User getLoggedInUser() {
         UserDetails principal = (UserDetails) getContext().getAuthentication().getPrincipal();
         return userService.findByUserName(principal.getUsername());
-
     }
 
 }

@@ -50,24 +50,34 @@ public class LabRequestController {
         return testRequestQueryService.findBy(INITIATED);
     }
 
+    /**
+     * get for tester
+     *
+     * @return {@link List}
+     * @see List
+     * @see TestRequest
+     */
     @GetMapping
     @PreAuthorize("hasAnyRole('TESTER')")
     public List<TestRequest> getForTester() {
-
-        // Implement This Method
-        // Create an object of User class and store the current logged in user first
+        //getting logged in user
         final User user = userLoggedInService.getLoggedInUser();
-        //Implement this method to return the list of test requests assigned to current tester(make use of the above created User object)
-        //Make use of the findByTester() method from testRequestQueryService class
-        // For reference check the method getForTests() method from LabRequestController class
+        //returns all the list of TestRequest for tester
         return testRequestQueryService.findByTester(user);
     }
 
-
+    /**
+     * assign for lab test
+     *
+     * @param id id
+     * @return {@link TestRequest}
+     * @see TestRequest
+     */
     @PreAuthorize("hasAnyRole('TESTER')")
     @PutMapping("/assign/{id}")
     public TestRequest assignForLabTest(@PathVariable Long id) {
         try {
+            //getting logged in user
             final User tester = userLoggedInService.getLoggedInUser();
             return testRequestUpdateService.assignForLabTest(id, tester);
         } catch (AppException e) {
@@ -76,6 +86,14 @@ public class LabRequestController {
 
     }
 
+    /**
+     * update lab test
+     *
+     * @param id id
+     * @param createLabResult createLabResult
+     * @return {@link TestRequest}
+     * @see TestRequest
+     */
     @PreAuthorize("hasAnyRole('TESTER')")
     @PutMapping("/update/{id}")
     public TestRequest updateLabTest(@PathVariable Long id, @RequestBody CreateLabResult createLabResult) {
