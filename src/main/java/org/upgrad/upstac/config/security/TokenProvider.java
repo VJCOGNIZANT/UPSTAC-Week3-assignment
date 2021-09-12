@@ -1,8 +1,10 @@
 package org.upgrad.upstac.config.security;
 
-import io.jsonwebtoken.*;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jws;
+import io.jsonwebtoken.JwtParser;
+import io.jsonwebtoken.Jwts;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -13,23 +15,26 @@ import org.springframework.stereotype.Component;
 
 import javax.servlet.ServletException;
 import java.io.Serializable;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.function.Function;
-import java.util.stream.Collectors;
+
+import static io.jsonwebtoken.Jwts.parser;
+import static io.jsonwebtoken.SignatureAlgorithm.HS256;
+import static java.lang.System.currentTimeMillis;
+import static java.util.Arrays.stream;
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
+import static org.slf4j.LoggerFactory.getLogger;
 
 @Component
 public class TokenProvider implements Serializable {
 
-
-    public static final  long JWT_TOKEN_VALIDITY = 12 * 60 * 60;
-
-    @Value("${token.secret}" )
-    private String secretKey;
-
-
+    public static final long JWT_TOKEN_VALIDITY = 12 * 60 * 60;
     static final String AUTHORITIES_KEY = "scopes";
+    private static final Logger log = getLogger(TokenProvider.class);
+    @Value("${token.secret}")
+    private String secretKey;
 
     public String getUsernameFromToken(String token) {
         return getClaimFromToken(token, Claims::getSubject);
@@ -45,7 +50,7 @@ public class TokenProvider implements Serializable {
     }
 
     private Claims getAllClaimsFromToken(String token) {
-        return Jwts.parser()
+        return parser()
                 .setSigningKey(secretKey)
                 .parseClaimsJws(token)
                 .getBody();
@@ -59,15 +64,15 @@ public class TokenProvider implements Serializable {
     public String generateToken(Authentication authentication) {
         final String authorities = authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.joining(","));
+                .collect(joining(","));
 
-        log.info("authorities",authorities);
+        log.info("authorities", authorities);
         return Jwts.builder()
                 .setSubject(authentication.getName())
                 .claim(AUTHORITIES_KEY, authorities)
-                .signWith(SignatureAlgorithm.HS256, secretKey)
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + JWT_TOKEN_VALIDITY*1000))
+                .signWith(HS256, secretKey)
+                .setIssuedAt(new Date(currentTimeMillis()))
+                .setExpiration(new Date(currentTimeMillis() + JWT_TOKEN_VALIDITY * 1000))
                 .compact();
     }
 
@@ -83,23 +88,20 @@ public class TokenProvider implements Serializable {
 
     UsernamePasswordAuthenticationToken getAuthentication(final String token, final Authentication existingAuth, final UserDetails userDetails) {
 
-        final JwtParser jwtParser = Jwts.parser().setSigningKey(secretKey);
+        final JwtParser jwtParser = parser().setSigningKey(secretKey);
 
         final Jws<Claims> claimsJws = jwtParser.parseClaimsJws(token);
 
         final Claims claims = claimsJws.getBody();
 
 
-
         log.info("claims" + claims.get(AUTHORITIES_KEY).toString());
         final Collection<? extends GrantedAuthority> authorities =
-                Arrays.stream(claims.get(AUTHORITIES_KEY).toString().split(","))
+                stream(claims.get(AUTHORITIES_KEY).toString().split(","))
                         .map(SimpleGrantedAuthority::new)
-                        .collect(Collectors.toList());
+                        .collect(toList());
 
         return new UsernamePasswordAuthenticationToken(userDetails, "", authorities);
     }
-
-    private static final Logger log = LoggerFactory.getLogger(TokenProvider.class);
 
 }

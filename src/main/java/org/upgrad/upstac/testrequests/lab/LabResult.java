@@ -9,16 +9,19 @@ import org.upgrad.upstac.users.User;
 import javax.persistence.*;
 import java.time.LocalDate;
 
+import static javax.persistence.FetchType.LAZY;
+import static javax.persistence.GenerationType.IDENTITY;
+
 @Data
 @Entity
 public class LabResult {
 
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = IDENTITY)
     Long resultId;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = LAZY)
     @JsonIgnore
     @ToString.Exclude
     private TestRequest request;

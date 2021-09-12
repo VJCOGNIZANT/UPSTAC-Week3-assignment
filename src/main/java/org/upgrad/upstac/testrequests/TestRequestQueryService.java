@@ -1,7 +1,6 @@
 package org.upgrad.upstac.testrequests;
 
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
@@ -14,76 +13,64 @@ import org.upgrad.upstac.users.User;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
+import static org.slf4j.LoggerFactory.getLogger;
 
 @Service
 @Validated
 public class TestRequestQueryService {
 
+    private static final Logger logger = getLogger(TestRequestQueryService.class);
     @Autowired
     private TestRequestRepository testRequestRepository;
-
-
     @Autowired
     private LabResultRepository labResultRepository;
-
-
     @Autowired
     private ConsultationRepository consultationRepository;
-
-    private static Logger logger = LoggerFactory.getLogger(TestRequestQueryService.class);
-
 
     public List<TestRequest> findAll() {
 
         return testRequestRepository.findAll();
     }
 
-
     public Optional<TestRequest> getTestRequestById(Long id) {
-
         return testRequestRepository.findById(id);
     }
-
-
-
 
     public List<TestRequest> findBy(RequestStatus requestStatus) {
         return testRequestRepository.findByStatus(requestStatus);
 
     }
 
-
-
     public List<TestRequest> findByTester(User user) {
-
-        return  labResultRepository.findByTester(user)
+        return labResultRepository.findByTester(user)
                 .stream()
                 .map(LabResult::getRequest)
-                .collect(Collectors.toList());
+                .collect(toList());
 
     }
 
     public List<TestRequest> findByDoctor(User user) {
-        return  consultationRepository.findByDoctor(user)
+        return consultationRepository.findByDoctor(user)
                 .stream()
                 .map(Consultation::getRequest)
-                .collect(Collectors.toList());
+                .collect(toList());
     }
 
 
-    public Optional<TestRequest> findTestRequestForUserByID(User user,Long id) {
+    public Optional<TestRequest> findTestRequestForUserByID(User user, Long id) {
 
 
         logger.info("findTestRequestForUserByID" + user.getRoles().toString());
 
-        if(user.doesRoleIsUser())
-            return  findByUserAndID(user,id);
-        else if(user.doesRoleIsTester())
-            return findByTesterAndID(user,id);
-        else if(user.doesRoleIsDoctor())
-            return findByDoctorAndID(user,id);
-        else if(user.doesRoleIsAuthority())
+        if (user.doesRoleIsUser())
+            return findByUserAndID(user, id);
+        else if (user.doesRoleIsTester())
+            return findByTesterAndID(user, id);
+        else if (user.doesRoleIsDoctor())
+            return findByDoctorAndID(user, id);
+        else if (user.doesRoleIsAuthority())
             return testRequestRepository.findByRequestId(id);
         else
             throw new AppException("Invalid Role");
@@ -91,38 +78,24 @@ public class TestRequestQueryService {
     }
 
 
+    public Optional<TestRequest> findByDoctorAndID(User doctor, Long id) {
 
-    public Optional<TestRequest> findByDoctorAndID(User doctor,Long id) {
-
-
-        return  testRequestRepository.findByRequestId(id)
-                .filter(testRequest -> consultationRepository.findByDoctorAndRequest(doctor,testRequest).isPresent());
-
-    }
-    public Optional<TestRequest> findByTesterAndID(User tester,Long id) {
-
-
-
-
-        return  testRequestRepository.findByRequestId(id)
-                .filter(testRequest -> labResultRepository.findByTesterAndRequest(tester,testRequest).isPresent());
-
-
-
-
-
-
+        return testRequestRepository.findByRequestId(id)
+                .filter(testRequest -> consultationRepository.findByDoctorAndRequest(doctor, testRequest).isPresent());
 
     }
 
-    public Optional<TestRequest> findByUserAndID(User user,Long id) {
+    public Optional<TestRequest> findByTesterAndID(User tester, Long id) {
+        return testRequestRepository.findByRequestId(id)
+                .filter(testRequest -> labResultRepository.findByTesterAndRequest(tester, testRequest).isPresent());
+    }
 
-        return  testRequestRepository.findByCreatedByAndRequestId(user,id);
-
+    public Optional<TestRequest> findByUserAndID(User user, Long id) {
+        return testRequestRepository.findByCreatedByAndRequestId(user, id);
     }
 
     public List<TestRequest> findByUser(User user) {
-        return  testRequestRepository.findByCreatedBy(user);
+        return testRequestRepository.findByCreatedBy(user);
     }
 
 }

@@ -6,6 +6,8 @@ import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.ConstraintViolationException;
 
+import static org.springframework.http.HttpStatus.*;
+
 public class UpgradResponseStatusException extends ResponseStatusException {
 
 
@@ -23,34 +25,34 @@ public class UpgradResponseStatusException extends ResponseStatusException {
         super(status, reason, cause);
     }
 
-
-
     public static UpgradResponseStatusException asForbidden(String msg) {
-        return asExceptionFromHttpStatus(msg, HttpStatus.FORBIDDEN);
+        return asExceptionFromHttpStatus(msg, FORBIDDEN);
     }
+
     public static UpgradResponseStatusException asBadRequest(String msg) {
-        return asExceptionFromHttpStatus(msg, HttpStatus.BAD_REQUEST);
+        return asExceptionFromHttpStatus(msg, BAD_REQUEST);
     }
+
     public static UpgradResponseStatusException asBadRequest(String msg, Throwable throwable) {
-        return new UpgradResponseStatusException( HttpStatus.BAD_REQUEST,msg,throwable);
+        return new UpgradResponseStatusException(BAD_REQUEST, msg, throwable);
     }
 
     public static UpgradResponseStatusException asServerError(String msg) {
-        return asExceptionFromHttpStatus(msg, HttpStatus.INTERNAL_SERVER_ERROR);
+        return asExceptionFromHttpStatus(msg, INTERNAL_SERVER_ERROR);
     }
-   public static UpgradResponseStatusException asNoContent(String msg) {
-        return asExceptionFromHttpStatus(msg, HttpStatus.BAD_REQUEST);
+
+    public static UpgradResponseStatusException asNoContent(String msg) {
+        return asExceptionFromHttpStatus(msg, BAD_REQUEST);
     }
 
 
     public static UpgradResponseStatusException asConstraintViolation(ConstraintViolationException e) {
 
-        return  new UpgradResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(),e);
+        return new UpgradResponseStatusException(BAD_REQUEST, e.getMessage(), e);
     }
 
     public static UpgradResponseStatusException asExceptionFromHttpStatus(String msg, HttpStatus httpStatus) {
         return new UpgradResponseStatusException(httpStatus, msg);
     }
-
 
 }

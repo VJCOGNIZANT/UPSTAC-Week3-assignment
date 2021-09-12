@@ -3,8 +3,8 @@ package org.upgrad.upstac.testrequests.flow;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
-import org.upgrad.upstac.testrequests.TestRequest;
 import org.upgrad.upstac.testrequests.RequestStatus;
+import org.upgrad.upstac.testrequests.TestRequest;
 import org.upgrad.upstac.users.User;
 
 import javax.transaction.Transactional;
@@ -17,7 +17,6 @@ public class TestRequestFlowService {
     @Autowired
     private TestRequestFlowRepository testRequestFlowRepository;
 
-
     @Transactional
     public void log(TestRequest testRequest, RequestStatus from, RequestStatus to, User changedBy) {
         TestRequestFlow testRequestFlow = new TestRequestFlow();
@@ -27,8 +26,6 @@ public class TestRequestFlowService {
         testRequestFlow.setToStatus(to);
         testRequestFlowRepository.save(testRequestFlow);
     }
-
-
 
     public List<TestRequestFlow> findByRequest(TestRequest testRequest) {
 

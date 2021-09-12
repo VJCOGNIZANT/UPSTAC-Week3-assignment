@@ -9,23 +9,25 @@ import org.upgrad.upstac.users.models.Gender;
 import javax.persistence.*;
 import java.time.LocalDate;
 
+import static javax.persistence.GenerationType.IDENTITY;
+import static org.upgrad.upstac.testrequests.RequestStatus.INITIATED;
+
 @Data
 @Entity
 public class TestRequest {
 
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = IDENTITY)
     Long requestId;
-
+    @OneToOne(mappedBy = "request")
+    Consultation consultation;
+    @OneToOne(mappedBy = "request")
+    LabResult labResult;
     @ManyToOne
     private User createdBy;
-
-    private LocalDate created=LocalDate.now();
-
-    private RequestStatus status = RequestStatus.INITIATED;
-
-
+    private LocalDate created = LocalDate.now();
+    private RequestStatus status = INITIATED;
     private String name;
     private Gender gender;
     private String address;
@@ -33,11 +35,5 @@ public class TestRequest {
     private String email;
     private String phoneNumber;
     private Integer pinCode;
-
-    @OneToOne(mappedBy="request")
-    Consultation consultation;
-
-    @OneToOne(mappedBy="request")
-    LabResult labResult;
 
 }

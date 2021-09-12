@@ -17,32 +17,29 @@ import org.upgrad.upstac.users.roles.Role;
 import org.upgrad.upstac.users.roles.RoleService;
 import org.upgrad.upstac.users.roles.UserRole;
 
-
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.*;
 
+import static org.upgrad.upstac.shared.Constant.*;
 import static org.upgrad.upstac.shared.DateParser.getDateFromString;
 import static org.upgrad.upstac.shared.StringValidator.isNotEmptyOrNull;
+import static org.upgrad.upstac.users.models.AccountStatus.APPROVED;
+import static org.upgrad.upstac.users.models.AccountStatus.INITIATED;
 
 
 @Service
 @Validated
 public class UserService {
 
-    @Autowired
-    private UserRepository userRepository;
-
+    private static final Logger log = LoggerFactory.getLogger(UserService.class);
     @Autowired
     RoleService roleService;
-
+    @Autowired
+    private UserRepository userRepository;
     @Autowired
     private BCryptPasswordEncoder bCryptPasswordEncoder;
-
-    private static final Logger log = LoggerFactory.getLogger(UserService.class);
-
-
 
     @Cacheable("user")
     public User findByUserName(String userName) {
@@ -52,31 +49,26 @@ public class UserService {
     }
 
     public List<User> findPendingApprovals() {
-
-        return userRepository.findByStatus(AccountStatus.INITIATED);
-
+        return userRepository.findByStatus(INITIATED);
     }
 
     public boolean isApprovedUser(String userName) {
-
-        return userRepository.findByUserName(userName).getStatus() == AccountStatus.APPROVED;
-
+        return userRepository.findByUserName(userName).getStatus() == APPROVED;
     }
 
     public void validateUserWithSameDataExists(RegisterRequest user) {
 
-        if((null != findByUserName(user.getUserName())))
-            throw new AppException("Username already exists " + user.getUserName());
+        if ((null != findByUserName(user.getUserName())))
+            throw new AppException(USERNAME_ALREADY_EXISTS + user.getUserName());
 
-        userRepository.findByEmail(user.getEmail()).ifPresent(user1 ->  {
-            throw new AppException("User with Same email already exists " + user.getEmail());
-        });
-        userRepository.findByPhoneNumber(user.getPhoneNumber()).ifPresent(user1 ->  {
-            throw new AppException("User with Same Phone number already exists " + user.getPhoneNumber());
+        userRepository.findByEmail(user.getEmail()).ifPresent(user1 -> {
+            throw new AppException(USER_WITH_SAME_EMAIL_ALREADY_EXISTS + user.getEmail());
         });
 
+        userRepository.findByPhoneNumber(user.getPhoneNumber()).ifPresent(user1 -> {
+            throw new AppException(USER_WITH_SAME_PHONE_NUMBER_ALREADY_EXISTS + user.getPhoneNumber());
+        });
     }
-
 
     public List<User> findAll() {
         List<User> list = new ArrayList<>();
@@ -84,41 +76,28 @@ public class UserService {
         return list;
     }
 
-
-
-
-
     public Optional<User> findById(Long id) {
         return userRepository.findById(id);
     }
 
-
     public User addUser(RegisterRequest user) {
-
-
-        return addUserWithRole(user, roleService.getForUser(), AccountStatus.APPROVED);
+        return addUserWithRole(user, roleService.getForUser(), APPROVED);
     }
 
     public User addDoctor(RegisterRequest user) {
-
-        return addUserWithRole(user, roleService.getForDoctor(), AccountStatus.INITIATED);
+        return addUserWithRole(user, roleService.getForDoctor(), INITIATED);
     }
-    public User addGovernmentAuthority(RegisterRequest user) {
 
-        return addUserWithRole(user, roleService.getForGovernmentAuthority(), AccountStatus.APPROVED);
+    public User addGovernmentAuthority(RegisterRequest user) {
+        return addUserWithRole(user, roleService.getForGovernmentAuthority(), APPROVED);
     }
 
     public User addTester(RegisterRequest user) {
-
-        return addUserWithRole(user, roleService.getForTester(), AccountStatus.INITIATED);
+        return addUserWithRole(user, roleService.getForTester(), INITIATED);
     }
 
-
     public User addUserWithRole(@Valid RegisterRequest registerRequest, Role role, AccountStatus status) {
-
         validateUserWithSameDataExists(registerRequest);
-
-
         User newUser = new User();
         newUser.setUserName(registerRequest.getUserName());
         newUser.setPassword(toEncrypted(registerRequest.getPassword()));
@@ -136,19 +115,13 @@ public class UserService {
         newUser.setDateOfBirth(getDateFromString(registerRequest.getDateOfBirth()));
         newUser.setStatus(status);
         User updatedUser = saveInDatabase(newUser);
-
-
         return updatedUser;
-
-
     }
 
     @CachePut(value = "user")
-    public User updateApprovalStatus(Long userId,AccountStatus status) {
+    public User updateApprovalStatus(Long userId, AccountStatus status) {
         User user = userRepository.findById(userId).orElseThrow(() -> new AppException("Invalid User ID"));
-
         return updateStatusAndSave(user, status);
-
     }
 
     public User updateStatusAndSave(User user, @NotNull AccountStatus status) {
@@ -158,47 +131,34 @@ public class UserService {
 
     @CachePut(value = "user")
     public User saveInDatabase(User newUser) {
-        try{
+        try {
             return userRepository.save(newUser);
-        }
-        catch (DataIntegrityViolationException e) {
-
+        } catch (DataIntegrityViolationException e) {
             e.printStackTrace();
             throw new AppException("User with same data Already exists, Email/Phone should be unique");
-
         }
-
     }
 
     public User updateUserDetails(User user, UpdateUserDetailRequest updateUserDetailRequest) {
-
-
-
-        if(isNotEmptyOrNull(updateUserDetailRequest.getFirstName()))
+        if (isNotEmptyOrNull(updateUserDetailRequest.getFirstName()))
             user.setFirstName(updateUserDetailRequest.getFirstName());
 
-        if(isNotEmptyOrNull(updateUserDetailRequest.getLastName()))
+        if (isNotEmptyOrNull(updateUserDetailRequest.getLastName()))
             user.setLastName(updateUserDetailRequest.getLastName());
 
-        if(isNotEmptyOrNull(updateUserDetailRequest.getEmail()))
+        if (isNotEmptyOrNull(updateUserDetailRequest.getEmail()))
             user.setEmail(updateUserDetailRequest.getEmail());
 
-        if(isNotEmptyOrNull(updateUserDetailRequest.getPhoneNumber()))
+        if (isNotEmptyOrNull(updateUserDetailRequest.getPhoneNumber()))
             user.setPhoneNumber(updateUserDetailRequest.getPhoneNumber());
-
-
-        User savedUser = saveInDatabase(user);
+        final User savedUser = saveInDatabase(user);
         log.info("updateUserDetails" + savedUser.toString());
         return savedUser;
-
-
     }
-
 
     public Set<Role> getRoleFor(UserRole userRole) {
         return getRolesForUser(roleService.findByRole(userRole));
     }
-
 
     private Set<Role> getRolesForUser(Role role) {
         Set<Role> roles = new HashSet<>();
@@ -206,9 +166,7 @@ public class UserService {
         return roles;
     }
 
-
     public String toEncrypted(String password) {
-
         return bCryptPasswordEncoder.encode(password);
     }
 
@@ -219,6 +177,4 @@ public class UserService {
     public User findByPhoneNumber(String email) {
         return userRepository.findByPhoneNumber(email).orElse(null);
     }
-
-
 }

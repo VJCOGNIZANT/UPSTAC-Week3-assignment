@@ -14,6 +14,5 @@ public class WebConfig implements WebMvcConfigurer {
                 .allowedOrigins("*")
                 .allowedHeaders("*")
                 .exposedHeaders("Location", "Access-Control-Allow-Origin");
-
     }
 }

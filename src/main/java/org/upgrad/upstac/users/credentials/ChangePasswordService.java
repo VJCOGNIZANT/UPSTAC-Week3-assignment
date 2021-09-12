@@ -2,7 +2,6 @@ package org.upgrad.upstac.users.credentials;
 
 
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -15,15 +14,17 @@ import org.upgrad.upstac.users.UserRepository;
 
 import javax.validation.Valid;
 
+import static org.slf4j.LoggerFactory.getLogger;
+
 
 @Service
 @Validated
 public class ChangePasswordService {
 
-
+    private static final Logger LOG = getLogger(ChangePasswordService.class);
     private AuthenticationManager authenticationManager;
-
     private BCryptPasswordEncoder bCryptPasswordEncoder;
+    private UserRepository userRepository;
 
 
     @Autowired
@@ -33,14 +34,7 @@ public class ChangePasswordService {
         this.userRepository = userRepository;
     }
 
-    private UserRepository userRepository;
-
-
-    private static final Logger log = LoggerFactory.getLogger(ChangePasswordService.class);
-
     public void changePassword(User user, @Valid ChangePasswordRequest changePasswordRequest) {
-
-
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
@@ -48,15 +42,11 @@ public class ChangePasswordService {
                             changePasswordRequest.getOldPassword()
                     )
             );
-
-            String changedPassword = changePasswordRequest.getPassword();
+            final String changedPassword = changePasswordRequest.getPassword();
             user.setPassword(bCryptPasswordEncoder.encode(changedPassword));
             userRepository.save(user);
-
         } catch (Exception e) {
             throw new ForbiddenException(e.getMessage());
         }
-
     }
-
 }

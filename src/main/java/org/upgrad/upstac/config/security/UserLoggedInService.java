@@ -1,31 +1,28 @@
 package org.upgrad.upstac.config.security;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.upgrad.upstac.users.User;
 import org.upgrad.upstac.users.UserService;
 
+import static org.springframework.security.core.context.SecurityContextHolder.getContext;
+
 
 @Component
 public class UserLoggedInService {
 
-    private UserService userService;
+    private final UserService userService;
 
     @Autowired
     public UserLoggedInService(UserService userService) {
         this.userService = userService;
     }
 
-
     public User getLoggedInUser() {
-            UserDetails principal = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-            return userService.findByUserName(principal.getUsername());
+        UserDetails principal = (UserDetails) getContext().getAuthentication().getPrincipal();
+        return userService.findByUserName(principal.getUsername());
 
     }
-
 
 }

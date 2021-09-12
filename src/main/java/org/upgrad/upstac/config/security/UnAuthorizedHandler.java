@@ -9,6 +9,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.Serializable;
 
+import static javax.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
+
 @Component
 public class UnAuthorizedHandler implements AuthenticationEntryPoint, Serializable {
 
@@ -17,6 +19,6 @@ public class UnAuthorizedHandler implements AuthenticationEntryPoint, Serializab
                          HttpServletResponse response,
                          AuthenticationException authException) throws IOException {
 
-        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+        response.sendError(SC_UNAUTHORIZED, "Unauthorized");
     }
 }

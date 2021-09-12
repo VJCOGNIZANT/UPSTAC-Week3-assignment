@@ -12,6 +12,8 @@ import org.upgrad.upstac.users.roles.UserRole;
 
 import java.time.LocalDateTime;
 
+import static org.slf4j.LoggerFactory.getLogger;
+import static org.upgrad.upstac.shared.Constant.*;
 import static org.upgrad.upstac.shared.DateParser.getDateFromString;
 import static org.upgrad.upstac.users.models.AccountStatus.APPROVED;
 import static org.upgrad.upstac.users.models.AccountStatus.INITIATED;
@@ -24,22 +26,18 @@ public class RegisterService {
     @Autowired
     private UserService userService;
 
-
-    private static final Logger log = LoggerFactory.getLogger(RegisterService.class);
-
+    private static final Logger LOG = getLogger(RegisterService.class);
 
     public User addUser(RegisterRequest user) {
 
-
         if((null != userService.findByUserName(user.getUserName())))
-            throw new AppException("Username already exists " + user.getUserName());
+            throw new AppException(USERNAME_ALREADY_EXISTS + user.getUserName());
 
         if((null != userService.findByEmail(user.getEmail())))
-            throw new AppException("User with Same email already exists " + user.getEmail());
-
+            throw new AppException(USER_WITH_SAME_EMAIL_ALREADY_EXISTS + user.getEmail());
 
         if((null != userService.findByPhoneNumber(user.getPhoneNumber())))
-            throw new AppException("User with Same Phone number already exists " + user.getPhoneNumber());
+            throw new AppException(USER_WITH_SAME_PHONE_NUMBER_ALREADY_EXISTS + user.getPhoneNumber());
 
         return updateUserDetails(user,USER, APPROVED);
     }
@@ -47,14 +45,14 @@ public class RegisterService {
     public User addDoctor(RegisterRequest user) {
 
         if((null != userService.findByUserName(user.getUserName())))
-            throw new AppException("Username already exists " + user.getUserName());
+            throw new AppException(USERNAME_ALREADY_EXISTS + user.getUserName());
 
         if((null != userService.findByEmail(user.getEmail())))
-            throw new AppException("User with Same email already exists " + user.getEmail());
+            throw new AppException(USER_WITH_SAME_EMAIL_ALREADY_EXISTS + user.getEmail());
 
 
         if((null != userService.findByPhoneNumber(user.getPhoneNumber())))
-            throw new AppException("User with Same Phone number already exists " + user.getPhoneNumber());
+            throw new AppException(USER_WITH_SAME_PHONE_NUMBER_ALREADY_EXISTS + user.getPhoneNumber());
 
         return updateUserDetails(user,DOCTOR, INITIATED);
     }
@@ -87,14 +85,13 @@ public class RegisterService {
     public User addGovernmentAuthority(RegisterRequest user) {
 
         if((null != userService.findByUserName(user.getUserName())))
-            throw new AppException("Username already exists " + user.getUserName());
+            throw new AppException(USERNAME_ALREADY_EXISTS + user.getUserName());
 
         if((null != userService.findByEmail(user.getEmail())))
-            throw new AppException("User with Same email already exists " + user.getEmail());
-
+            throw new AppException(USER_WITH_SAME_EMAIL_ALREADY_EXISTS + user.getEmail());
 
         if((null != userService.findByPhoneNumber(user.getPhoneNumber())))
-            throw new AppException("User with Same Phone number already exists " + user.getPhoneNumber());
+            throw new AppException(USER_WITH_SAME_PHONE_NUMBER_ALREADY_EXISTS + user.getPhoneNumber());
 
         return updateUserDetails(user,GOVERNMENT_AUTHORITY, APPROVED);
     }
@@ -102,14 +99,14 @@ public class RegisterService {
     public User addTester(RegisterRequest user) {
 
         if((null != userService.findByUserName(user.getUserName())))
-            throw new AppException("Username already exists " + user.getUserName());
+            throw new AppException(USERNAME_ALREADY_EXISTS + user.getUserName());
 
         if((null != userService.findByEmail(user.getEmail())))
-            throw new AppException("User with Same email already exists " + user.getEmail());
+            throw new AppException(USER_WITH_SAME_EMAIL_ALREADY_EXISTS + user.getEmail());
 
 
         if((null != userService.findByPhoneNumber(user.getPhoneNumber())))
-            throw new AppException("User with Same Phone number already exists " + user.getPhoneNumber());
+            throw new AppException(USER_WITH_SAME_PHONE_NUMBER_ALREADY_EXISTS + user.getPhoneNumber());
 
         return updateUserDetails(user,TESTER, INITIATED);
     }
